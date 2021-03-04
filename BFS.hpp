@@ -2,6 +2,7 @@
 #define _NP_BFS_H
 
 #include <algorithm>
+#include <list>
 #include <queue>
 #include <set>
 #include <unordered_map>
@@ -28,6 +29,8 @@ private:
 	using BFSQueue = std::queue<K, std::deque<K, alloc<K>>>;
 	template<typename K>
 	using BFSVector = std::vector<K, alloc<K>>;
+	template<typename K>
+	using BFSList = std::list<K, alloc<K>>;
 
 public:
 	BFS() {}
@@ -101,7 +104,7 @@ public:
 		)
 			return nullptr;
 		
-		BFSVector<Path> paths;
+		BFSList<Path> paths;
 		BFSQueue<Path*> queue;
 		BFSSet<Vertex*> visited;
 		int expansion = 1;
@@ -146,8 +149,9 @@ public:
 
 				// New result
 				TreeSearch::Result *result = newResult(paths.size());
-				std::copy(paths.begin(), paths.end(), result->vertexes);
+				result->cost = result->expansions = expansion;
 
+				std::copy(paths.begin(), paths.end(), result->vertexes);
 				return result;
 			}
 

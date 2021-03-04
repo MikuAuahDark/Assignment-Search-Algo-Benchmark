@@ -75,7 +75,7 @@ int main()
 			{
 				std::cout << (std::string) (*res->vertexes[i]);
 
-				if (i == res->vertexCount - 1)
+				if (i != res->vertexCount - 1)
 					std::cout << " --> ";
 				else
 					std::cout << std::endl;

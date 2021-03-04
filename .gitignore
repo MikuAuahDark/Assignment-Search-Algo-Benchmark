@@ -1,0 +1,5 @@
+.vscode/
+build/
+a.exe
+a.out
+*.jpg

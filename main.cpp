@@ -53,6 +53,9 @@ struct TrackingAllocator
 
 int main()
 {
+	std::ios_base::sync_with_stdio(false);
+	std::cin.tie(nullptr);
+
 	std::vector<Vertex> vertexes = {
 		Vertex("Arad"),          // 0
 		Vertex("Timisoara"),     // 1

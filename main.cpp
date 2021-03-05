@@ -7,6 +7,50 @@
 #include "Edge.hpp"
 #include "Vertex.hpp"
 
+static size_t trackedMemory = 0;
+
+template<typename T>
+struct TrackingAllocator
+{
+	using value_type = T;
+
+	constexpr TrackingAllocator() noexcept {}
+    constexpr TrackingAllocator(const TrackingAllocator&) noexcept = default;
+    template <class U>
+    constexpr TrackingAllocator(const TrackingAllocator<U>&) noexcept {}
+
+	T *allocate(size_t count, void *hint = 0)
+	{
+		size_t bytes = count * sizeof(T);
+		void *result = malloc(bytes);
+
+		if (result)
+		{
+			trackedMemory += bytes;
+			std::cerr << "TrackingAllocator: add " << bytes << std::endl;
+		}
+
+		return (T *) result;
+	}
+
+	void deallocate(T *ptr, size_t count)
+	{
+		if (ptr)
+		{
+			size_t bytes = count * sizeof(T);
+			trackedMemory -= (ptr != nullptr) * count * sizeof(T);
+
+			free(ptr);
+			std::cerr << "TrackingAllocator: sub " << bytes << std::endl;
+		}
+	}
+
+	template <class U>
+	bool operator==(const TrackingAllocator<U> &a) {return true;}
+	template <class U>
+	bool operator!=(const TrackingAllocator<U> &a) {return false;}
+};
+
 int main()
 {
 	std::vector<Vertex> vertexes = {
@@ -59,7 +103,7 @@ int main()
 		Edge(vertexes[18], vertexes[19], 86)
 	};
 
-	BFS<> *bfs = new BFS<>();
+	TreeSearch *bfs = new BFS<TrackingAllocator>();
 	if (bfs->initialize(vertexes.data(), vertexes.size(), edges.data(), edges.size()))
 	{
 		std::cout << "Arad -> Bucharest: BFS" << std::endl;
@@ -84,6 +128,7 @@ int main()
 			free(res);
 		}
 	}
-	else
-		return 1;
+
+	delete bfs;
+	return 0;
 }

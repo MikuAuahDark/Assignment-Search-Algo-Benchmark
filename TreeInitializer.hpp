@@ -3,7 +3,7 @@
 template<template<class> class alloc = std::allocator>
 class TreeInitializer: public TreeSearch
 {
-private:
+protected:
 	template<typename T>
 	using TreeSet = std::set<T, std::less<T>, alloc<T>>;
 	template<typename K, typename V>

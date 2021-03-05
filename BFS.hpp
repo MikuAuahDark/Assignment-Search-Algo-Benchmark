@@ -9,39 +9,38 @@
 #include <vector>
 
 #include "TreeInitializer.hpp"
+#include "PathCost.hpp"
 
 // Breadth First Search
 template<template<class> class alloc = std::allocator>
 class BFS: public TreeInitializer<alloc>
 {
 private:
-	struct Path
-	{
-		Edge *current;
-		Path *prev;
-	};
-
 	template<typename K>
 	using BFSQueue = std::queue<K, std::deque<K, alloc<K>>>;
+	template<typename K>
+	using BFSSet = typename TreeInitializer<alloc>::template TreeSet<K>;
+	template<typename K>
+	using BFSList = typename TreeInitializer<alloc>::template TreeList<K>;
 
 public:
 	TreeSearch::Result *find(Vertex *source, Vertex *destination) override
 	{
 		if (
-			neighboor.find(source) == neighboor.end() ||
-			std::find(verts.begin(), verts.end(), destination) == verts.end()
+			this->neighboor.find(source) == this->neighboor.end() ||
+			std::find(this->verts.begin(), this->verts.end(), destination) == this->verts.end()
 		)
 			return nullptr;
 		
-		TreeList<Path> paths;
+		BFSList<Path> paths;
 		BFSQueue<Path*> queue;
-		TreeSet<Vertex*> visited;
+		BFSSet<Vertex*> visited;
 		int expansion = 1;
 
 		visited.insert(source);
 
 		// Do first expansion
-		for (Edge *adj: neighboor[source])
+		for (Edge *adj: this->neighboor[source])
 		{
 			paths.emplace_back();
 			Path &p = paths.back();
@@ -77,7 +76,7 @@ public:
 				std::reverse(paths.begin(), paths.end());
 
 				// New result
-				TreeSearch::Result *result = newResult(paths.size());
+				TreeSearch::Result *result = TreeSearch::newResult(paths.size());
 				result->cost = result->expansions = expansion;
 
 				std::copy(paths.begin(), paths.end(), result->vertexes);
@@ -89,9 +88,9 @@ public:
 			{
 				visited.insert(next);
 
-				if (neighboor.find(next) != neighboor.end())
+				if (this->neighboor.find(next) != this->neighboor.end())
 				{
-					TreeSet<Edge*> &adjacent = neighboor[next];
+					BFSSet<Edge*> &adjacent = this->neighboor[next];
 
 					for (Edge *adj: adjacent)
 					{

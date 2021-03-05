@@ -1,13 +1,17 @@
 #include <cstdlib>
 
+#include <atomic>
 #include <iostream>
 #include <vector>
 
 #include "BFS.hpp"
+#include "UCS.hpp"
+
 #include "Edge.hpp"
 #include "Vertex.hpp"
 
-static size_t trackedMemory = 0;
+//static size_t trackedMemory = 0;
+static std::atomic<size_t> trackedMemory {0};
 
 template<typename T>
 struct TrackingAllocator
@@ -106,32 +110,56 @@ int main()
 		Edge(vertexes[18], vertexes[19], 86)
 	};
 
-	TreeSearch *bfs = new BFS<TrackingAllocator>();
-	if (bfs->initialize(vertexes.data(), vertexes.size(), edges.data(), edges.size()))
+	auto startTest = [&vertexes, &edges](TreeSearch *t, Vertex *a, Vertex *b)
 	{
-		std::cout << "Arad -> Bucharest: BFS" << std::endl;
+		std::cerr << "TrackingAllocator: reg initialize" << std::endl;
+		bool result = t->initialize(vertexes.data(), vertexes.size(), edges.data(), edges.size());
+		std::cerr << "TrackingAllocator: edr initialize" << std::endl;
 
-		// Find from Arad to Bucharest
-		TreeSearch::Result *res = bfs->find(&vertexes[0], &vertexes[13]);
-
-		if (res == nullptr)
-			std::cout << "Not found" << std::endl;
-		else
+		if (result)
 		{
-			for (size_t i = 0; i < res->vertexCount; i++)
+			std::cerr << "TrackingAllocator: reg find" << std::endl;
+			TreeSearch::Result *res = t->find(a, b);
+			std::cerr << "TrackingAllocator: edr find" << std::endl;
+
+			if (res == nullptr)
+				std::cout << "Not found" << std::endl;
+			else
 			{
-				std::cout << (std::string) (*res->vertexes[i]);
+				for (size_t i = 0; i < res->vertexCount; i++)
+				{
+					std::cout << (std::string) (*res->vertexes[i]);
 
-				if (i != res->vertexCount - 1)
-					std::cout << " --> ";
-				else
-					std::cout << std::endl;
+					if (i != res->vertexCount - 1)
+						std::cout << " --> ";
+					else
+						std::cout << std::endl;
+				}
+
+				std::cout << "Cost: " << res->cost << std::endl << "Expansion: " << res->expansions << std::endl;
+				free(res);
 			}
-
-			free(res);
 		}
-	}
+		else
+			std::cout << "Unable to initialize" << std::endl;
+	};
 
-	delete bfs;
+	TreeSearch *tree = nullptr;
+
+	// BFS
+	std::cout << "Arad -> Bucharest: BFS" << std::endl;
+	tree = new BFS<TrackingAllocator>();
+	startTest(tree, &vertexes[0], &vertexes[13]);
+	delete tree;
+
+	// UCS
+	std::cout << "Arad -> Bucharest: UCS" << std::endl;
+	tree = new UCS<TrackingAllocator>();
+	startTest(tree, &vertexes[0], &vertexes[13]);
+	delete tree;
+
+	if (trackedMemory != 0)
+		std::cerr << "TrackingAllocator: err possible memory leak allocated " << trackedMemory << std::endl;
+
 	return 0;
 }

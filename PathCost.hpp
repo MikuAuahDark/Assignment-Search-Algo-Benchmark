@@ -22,4 +22,12 @@ struct PathCostComparator
 	}
 };
 
+struct PathDepth
+{
+	Edge *current;
+	PathDepth *prev;
+	size_t depth;
+	bool active;
+};
+
 #endif

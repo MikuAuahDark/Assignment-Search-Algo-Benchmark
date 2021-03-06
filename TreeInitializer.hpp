@@ -1,3 +1,6 @@
+#ifndef _NP_TREEINITIALIZER_H
+#define _NP_TREEINITIALIZER_H
+
 #include "TreeSearch.hpp"
 
 template<template<class> class alloc = std::allocator>
@@ -81,3 +84,5 @@ protected:
 	TreeVector<Edge> tempEdges;
 	TreeMap<Vertex*, TreeSet<Edge*>> neighboor;
 };
+
+#endif

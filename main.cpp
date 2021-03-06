@@ -1,17 +1,23 @@
 #include <cstdlib>
 
 #include <atomic>
+#include <chrono>
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "BFS.hpp"
+#include "DFS.hpp"
+#include "DLS.hpp"
 #include "UCS.hpp"
 
 #include "Edge.hpp"
 #include "Vertex.hpp"
 
-//static size_t trackedMemory = 0;
-static std::atomic<size_t> trackedMemory {0};
+#include "Problem.hpp"
+
+static size_t trackedMemory = 0;
+//static std::atomic<size_t> trackedMemory {0};
 
 template<typename T>
 struct TrackingAllocator
@@ -55,107 +61,76 @@ struct TrackingAllocator
 	bool operator!=(const TrackingAllocator<U> &a) {return false;}
 };
 
+void startTest(
+	const std::string &algo,
+	const std::string &name,
+	Vertex *vertexes,
+	size_t vertexSize,
+	Edge *edges,
+	size_t edgeSize,
+	TreeSearch *t,
+	Vertex *a, Vertex *b
+)
+{
+	std::cerr << "TrackingAllocator: str " << name << " " << algo << std::endl;
+	std::cerr << "TrackingAllocator: reg initialize" << std::endl;
+
+	auto startTime = std::chrono::high_resolution_clock::now();
+	bool result = t->initialize(vertexes, vertexSize, edges, edgeSize);
+	std::chrono::duration<double> duration = std::chrono::high_resolution_clock::now() - startTime;
+
+	std::cerr << "TrackingAllocator: edr initialize " << size_t(duration.count() * 1000000.0) << std::endl;
+
+	if (result)
+	{
+		std::cout << name << " problem with " << algo << ": Points from " << (std::string) (*a) << " -> " << (std::string) (*b) << std::endl;
+		std::cerr << "TrackingAllocator: reg find" << std::endl;
+
+		startTime = std::chrono::high_resolution_clock::now();
+		TreeSearch::Result *res = t->find(a, b);
+		duration = std::chrono::high_resolution_clock::now() - startTime;
+
+		std::cerr << "TrackingAllocator: edr find " << size_t(duration.count() * 1000000.0) << std::endl;
+
+		if (res == nullptr)
+			std::cout << "Not found" << std::endl;
+		else
+		{
+			for (size_t i = 0; i < res->vertexCount; i++)
+			{
+				std::cout << (std::string) (*res->vertexes[i]);
+
+				if (i != res->vertexCount - 1)
+					std::cout << " --> ";
+				else
+					std::cout << std::endl;
+			}
+
+			std::cout << "Cost: " << res->cost << std::endl << "Expansion: " << res->expansions << std::endl;
+			free(res);
+		}
+	}
+	else
+		std::cout << "Unable to initialize" << std::endl;
+
+	std::cerr << "TrackingAllocator: stp " << name << " " << algo << std::endl;
+}
+
 int main()
 {
 	std::ios_base::sync_with_stdio(false);
 	std::cin.tie(nullptr);
 
-	std::vector<Vertex> vertexes = {
-		Vertex("Arad"),          // 0
-		Vertex("Timisoara"),     // 1
-		Vertex("Zerind"),        // 2
-		Vertex("Oradea"),        // 3
-		Vertex("Lugoj"),         // 4
-		Vertex("Drobeta"),       // 5
-		Vertex("Mehadia"),       // 6
-		Vertex("Sibiu"),         // 7
-		Vertex("Rimnicu Vilcea"),// 8
-		Vertex("Craiova"),       // 9
-		Vertex("Fagaras"),       // 10
-		Vertex("Pitesti"),       // 11
-		Vertex("Giurgiu"),       // 12
-		Vertex("Bucharest"),     // 13
-		Vertex("Neamt"),         // 14
-		Vertex("Urziceni"),      // 15
-		Vertex("Iasi"),          // 16
-		Vertex("Vaslui"),        // 17
-		Vertex("Hirsova"),       // 18
-		Vertex("Eforie")         // 19
-	};
-	std::vector<Edge> edges = {
-		// Arah deklarasi ke kanan
-		// akan otomatis membuat sisi arah lainnya
-		Edge(vertexes[0], vertexes[1], 118),
-		Edge(vertexes[0], vertexes[2], 75),
-		Edge(vertexes[0], vertexes[7], 140),
-		Edge(vertexes[1], vertexes[4], 111),
-		Edge(vertexes[2], vertexes[3], 71),
-		Edge(vertexes[3], vertexes[7], 151),
-		Edge(vertexes[4], vertexes[6], 70),
-		Edge(vertexes[5], vertexes[9], 120),
-		Edge(vertexes[6], vertexes[5], 75),
-		Edge(vertexes[7], vertexes[8], 80),
-		Edge(vertexes[7], vertexes[10], 99),
-		Edge(vertexes[8], vertexes[9], 146),
-		Edge(vertexes[8], vertexes[11], 97),
-		Edge(vertexes[9], vertexes[11], 138),
-		Edge(vertexes[10], vertexes[13], 211),
-		Edge(vertexes[11], vertexes[13], 101),
-		Edge(vertexes[13], vertexes[12], 90),
-		Edge(vertexes[13], vertexes[15], 85),
-		Edge(vertexes[15], vertexes[17], 142),
-		Edge(vertexes[15], vertexes[18], 98),
-		Edge(vertexes[16], vertexes[14], 87),
-		Edge(vertexes[17], vertexes[16], 92),
-		Edge(vertexes[18], vertexes[19], 86)
-	};
+	Problem *romania = Problem::getRomaniaProblem();
+	Problem *simple = Problem::getSimpleProblem();
 
-	auto startTest = [&vertexes, &edges](TreeSearch *t, Vertex *a, Vertex *b)
-	{
-		std::cerr << "TrackingAllocator: reg initialize" << std::endl;
-		bool result = t->initialize(vertexes.data(), vertexes.size(), edges.data(), edges.size());
-		std::cerr << "TrackingAllocator: edr initialize" << std::endl;
-
-		if (result)
-		{
-			std::cerr << "TrackingAllocator: reg find" << std::endl;
-			TreeSearch::Result *res = t->find(a, b);
-			std::cerr << "TrackingAllocator: edr find" << std::endl;
-
-			if (res == nullptr)
-				std::cout << "Not found" << std::endl;
-			else
-			{
-				for (size_t i = 0; i < res->vertexCount; i++)
-				{
-					std::cout << (std::string) (*res->vertexes[i]);
-
-					if (i != res->vertexCount - 1)
-						std::cout << " --> ";
-					else
-						std::cout << std::endl;
-				}
-
-				std::cout << "Cost: " << res->cost << std::endl << "Expansion: " << res->expansions << std::endl;
-				free(res);
-			}
-		}
-		else
-			std::cout << "Unable to initialize" << std::endl;
-	};
-
-	TreeSearch *tree = nullptr;
-
-	// BFS
-	std::cout << "Arad -> Bucharest: BFS" << std::endl;
-	tree = new BFS<TrackingAllocator>();
-	startTest(tree, &vertexes[0], &vertexes[13]);
+	// Test
+	TreeSearch *tree = new BFS<TrackingAllocator>();
+	startTest("BFS", "Romania", romania->vertexes, romania->vertexesCount, romania->edgeFull, romania->edgeFullCount, tree, &romania->vertexes[0], &romania->vertexes[13]);
 	delete tree;
 
-	// UCS
-	std::cout << "Arad -> Bucharest: UCS" << std::endl;
 	tree = new UCS<TrackingAllocator>();
-	startTest(tree, &vertexes[0], &vertexes[13]);
+	startTest("UCS", "Romania", romania->vertexes, romania->vertexesCount, romania->edgeFull, romania->edgeFullCount, tree, &romania->vertexes[0], &romania->vertexes[13]);
 	delete tree;
 
 	if (trackedMemory != 0)

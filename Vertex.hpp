@@ -6,6 +6,7 @@
 struct Vertex
 {
 	Vertex(const std::string &name);
+	inline Vertex(const char *name): Vertex(std::string(name)) {}
 
 	operator std::string() const;
 	bool operator==(const Vertex &v) const noexcept;

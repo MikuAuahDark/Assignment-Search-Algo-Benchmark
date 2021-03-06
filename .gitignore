@@ -3,3 +3,5 @@ build/
 a.exe
 a.out
 *.jpg
+*.csv
+#clang++ -fuse-ld=lld *.cpp && a

@@ -11,7 +11,7 @@ template<template<class> class alloc = std::allocator>
 class DFS: public DLS<alloc>
 {
 public:
-	DFS(): DLS(~size_t(0)) {}
+	DFS(): DLS<alloc>(~size_t(0)) {}
 };
 
 #endif

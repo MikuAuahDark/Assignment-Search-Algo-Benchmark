@@ -2,6 +2,7 @@
 build/
 a.exe
 a.out
+bench.txt
+result.txt
 *.jpg
-*.csv
-#clang++ -fuse-ld=lld *.cpp && a
+#clang++ -fuse-ld=lld *.cpp && a 2>bench.txt >result.txt

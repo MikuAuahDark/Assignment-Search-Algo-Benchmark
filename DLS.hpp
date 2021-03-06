@@ -29,6 +29,8 @@ public:
 		)
 			return nullptr;
 		
+		allDiscovered = true;
+
 		DLSList<PathDepth> paths;
 		DLSStack<PathDepth*> stack;
 		DLSSet<Vertex*> visited;
@@ -100,16 +102,25 @@ public:
 							stack.push(&newPath);
 						}
 					}
+
+					if (adjacent.size() == 0)
+						p->active = false;
 				}
+				else
+					p->active = false;
 			}
 			else
+			{
 				p->active = false;
+				allDiscovered = false;
+			}
 		}
 
 		return nullptr;
 	}
 protected:
 	size_t depth;
+	bool allDiscovered;
 
 	static PathDepth &findPathDepth(DLSList<PathDepth> &list)
 	{

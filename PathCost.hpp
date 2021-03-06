@@ -18,7 +18,7 @@ struct PathCostComparator
 {
 	bool operator()(const PathCost *a, const PathCost *b)
 	{
-		return a->totalCost - b->totalCost;
+		return a->totalCost > b->totalCost;
 	}
 };
 

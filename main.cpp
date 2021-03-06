@@ -8,8 +8,9 @@
 
 #include "BFS.hpp"
 #include "DFS.hpp"
-#include "DLS.hpp"
+#include "IDDLS.hpp"
 #include "UCS.hpp"
+#include "BDS.hpp"
 
 #include "Edge.hpp"
 #include "Vertex.hpp"
@@ -17,7 +18,6 @@
 #include "Problem.hpp"
 
 static size_t trackedMemory = 0;
-//static std::atomic<size_t> trackedMemory {0};
 
 template<typename T>
 struct TrackingAllocator
@@ -114,6 +114,7 @@ void startTest(
 		std::cout << "Unable to initialize" << std::endl;
 
 	std::cerr << "TrackingAllocator: stp " << name << " " << algo << std::endl;
+	std::cout << std::endl;
 }
 
 int main()
@@ -121,17 +122,55 @@ int main()
 	std::ios_base::sync_with_stdio(false);
 	std::cin.tie(nullptr);
 
-	Problem *romania = Problem::getRomaniaProblem();
-	Problem *simple = Problem::getSimpleProblem();
+	std::vector<std::pair<std::string, Problem*>> problems = {
+		{"Simple", Problem::getSimpleProblem()},
+		{"Romania", Problem::getRomaniaProblem()},
+		{"Number", Problem::getNumberProblem()},
+		{"StarSystem", Problem::getStarSystemProblem()}
+	};
 
 	// Test
-	TreeSearch *tree = new BFS<TrackingAllocator>();
-	startTest("BFS", "Romania", romania->vertexes, romania->vertexesCount, romania->edgeFull, romania->edgeFullCount, tree, &romania->vertexes[0], &romania->vertexes[13]);
-	delete tree;
+	for (std::pair<std::string, Problem*> &p: problems)
+	{
+		Problem *pr = p.second;
+		std::string &name = p.first;
 
-	tree = new UCS<TrackingAllocator>();
-	startTest("UCS", "Romania", romania->vertexes, romania->vertexesCount, romania->edgeFull, romania->edgeFullCount, tree, &romania->vertexes[0], &romania->vertexes[13]);
-	delete tree;
+		TreeSearch *tree = new BFS<TrackingAllocator>();
+		startTest("BFS", name, pr->vertexes, pr->vertexesCount, pr->edgeFull, pr->edgeFullCount, tree, pr->start, pr->end);
+		delete tree;
+
+		tree = new DFS<TrackingAllocator>();
+		startTest("DFS", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		delete tree;
+
+		tree = new DLS<TrackingAllocator>(5);
+		startTest("DLS5", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		delete tree;
+		
+		tree = new DLS<TrackingAllocator>(10);
+		startTest("DLS10", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		delete tree;
+		
+		tree = new DLS<TrackingAllocator>(20);
+		startTest("DLS20", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		delete tree;
+		
+		tree = new DLS<TrackingAllocator>(40);
+		startTest("DLS40", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		delete tree;
+
+		tree = new DLS<TrackingAllocator>(60);
+		startTest("DLS60", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		delete tree;
+
+		tree = new UCS<TrackingAllocator>();
+		startTest("UCS", name, pr->vertexes, pr->vertexesCount, pr->edgeFull, pr->edgeFullCount, tree, pr->start, pr->end);
+		delete tree;
+
+		tree = new IDDLS<TrackingAllocator>(100);
+		startTest("IDDLS", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		delete tree;
+	}
 
 	if (trackedMemory != 0)
 		std::cerr << "TrackingAllocator: err possible memory leak allocated " << trackedMemory << std::endl;

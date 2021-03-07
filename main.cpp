@@ -170,6 +170,12 @@ int main()
 		tree = new IDDLS<TrackingAllocator>(100);
 		startTest("IDDLS", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
 		delete tree;
+		
+		/*
+		tree = new BDS<TrackingAllocator>();
+		startTest("BDS", name, pr->vertexes, pr->vertexesCount, pr->edgeFull, pr->edgeFullCount, tree, pr->start, pr->end);
+		delete tree;
+		*/
 	}
 
 	if (trackedMemory != 0)

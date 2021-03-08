@@ -18,7 +18,7 @@ private:
 	using DLSStack = std::stack<K, std::deque<K, alloc<K>>>;
 
 public:
-	DLS(size_t depth): depth(depth) {}
+	DLS(size_t depth): depth(depth), allDiscovered(false) {}
 	DLS *setDepth(size_t d) { depth = d; return this; }
 
 	TreeSearch::Result *find(Vertex *source, Vertex *destination) override
@@ -33,15 +33,15 @@ public:
 
 		DLSList<PathDepth> paths;
 		DLSStack<PathDepth*> stack;
-		DLSSet<Vertex*> visited;
 		int expansion = 1;
 
 		// Do first expansion
-		for (Edge *adj: this->neighboor[source])
+		auto neighboor = this->neighboor[source];
+		for (auto i = neighboor.rbegin(); i != neighboor.rend(); i++)
 		{
 			PathDepth &p = findPathDepth(paths);
 
-			p.current = adj;
+			p.current = *i;
 			p.prev = nullptr;
 			p.depth = 0;
 			p.active = true;
@@ -88,8 +88,10 @@ public:
 				{
 					DLSSet<Edge*> &adjacent = this->neighboor[next];
 
-					for (Edge *adj: adjacent)
+					for (auto i = adjacent.rbegin(); i != adjacent.rend(); i++)
 					{
+						Edge *adj = *i;
+
 						if (adj->getB() != p->current->getA())
 						{
 							PathDepth &newPath = findPathDepth(paths);

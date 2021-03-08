@@ -72,6 +72,8 @@ void startTest(
 	Vertex *a, Vertex *b
 )
 {
+	if (name == "Romania" && algo == "DFS") return; // infinite loop, can't be tested
+
 	std::cerr << "TrackingAllocator: str " << name << " " << algo << std::endl;
 	std::cerr << "TrackingAllocator: reg initialize" << std::endl;
 
@@ -140,27 +142,28 @@ int main()
 		delete tree;
 
 		tree = new DFS<TrackingAllocator>();
-		startTest("DFS", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		//startTest("DFS", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		startTest("DFS", name, pr->vertexes, pr->vertexesCount, pr->edgeFull, pr->edgeFullCount, tree, pr->start, pr->end);
 		delete tree;
 
 		tree = new DLS<TrackingAllocator>(5);
-		startTest("DLS5", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		startTest("DLS5", name, pr->vertexes, pr->vertexesCount, pr->edgeFull, pr->edgeFullCount, tree, pr->start, pr->end);
 		delete tree;
 		
 		tree = new DLS<TrackingAllocator>(10);
-		startTest("DLS10", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		startTest("DLS10", name, pr->vertexes, pr->vertexesCount, pr->edgeFull, pr->edgeFullCount, tree, pr->start, pr->end);
 		delete tree;
 		
 		tree = new DLS<TrackingAllocator>(20);
-		startTest("DLS20", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		startTest("DLS20", name, pr->vertexes, pr->vertexesCount, pr->edgeFull, pr->edgeFullCount, tree, pr->start, pr->end);
 		delete tree;
 		
 		tree = new DLS<TrackingAllocator>(40);
-		startTest("DLS40", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		startTest("DLS40", name, pr->vertexes, pr->vertexesCount, pr->edgeFull, pr->edgeFullCount, tree, pr->start, pr->end);
 		delete tree;
 
 		tree = new DLS<TrackingAllocator>(60);
-		startTest("DLS60", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		startTest("DLS60", name, pr->vertexes, pr->vertexesCount, pr->edgeFull, pr->edgeFullCount, tree, pr->start, pr->end);
 		delete tree;
 
 		tree = new UCS<TrackingAllocator>();
@@ -168,7 +171,7 @@ int main()
 		delete tree;
 
 		tree = new IDDLS<TrackingAllocator>(100);
-		startTest("IDDLS", name, pr->vertexes, pr->vertexesCount, pr->edgeDFS, pr->edgeDFSCount, tree, pr->start, pr->end);
+		startTest("IDDLS", name, pr->vertexes, pr->vertexesCount, pr->edgeFull, pr->edgeFullCount, tree, pr->start, pr->end);
 		delete tree;
 		
 		/*
